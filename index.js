@@ -15,12 +15,14 @@ app.route('/api/users').get( (req, res) => {
 }).post((req, res) => {
     const user = req.body;
     console.log(user)
+
+    if (!user || !user.first_name || !user.last_name || !user.email || !user.gender || !user.job_title) return res.status(400).send("Please provide all required fields");
     users.push({...user, id: users.length + 1});
     
     fs.writeFile("MOCK_DATA.json", JSON.stringify(users), (err) => {
         if (err) throw err;
 
-        return res.send(`User added successfully with id ${users.length}`);
+        return res.status(201).send(`User added successfully with id ${users.length}`);
     })
 })
 
@@ -28,11 +30,14 @@ app.route('/api/users').get( (req, res) => {
 app.route('/api/users/:id').get((req, res) => {
     const id = Number(req.params.id);
     const user = users.find(user => user.id == id);
+    if (!user) return res.status(404).send("User not found");
     return res.send(user);
 }).patch((req, res) => {
     const id = Number(req.params.id);
     const userChanges = req.body;
     const userIndex = users.findIndex(user => user.id == id); 
+
+    if (userIndex < 0) return res.status(404).send("User not found");
 
     users[userIndex] = {...users[userIndex], ...userChanges};
 
@@ -45,6 +50,10 @@ app.route('/api/users/:id').get((req, res) => {
     })
 }).delete((req, res) => {
     const id = Number(req.params.id);
+    const userIndex = users.findIndex(user => user.id == id); 
+
+    if (userIndex < 0) return res.status(404).send("User not found");
+
     const newUsers = users.filter(user => user.id != id);
     
     fs.writeFile("MOCK_DATA.json", JSON.stringify(newUsers), (err) => {
