@@ -43,10 +43,18 @@ app.route('/api/users/:id').get((req, res) => {
             `User with id ${id} updated successfully`
         );
     })
-
+}).delete((req, res) => {
+    const id = Number(req.params.id);
+    const newUsers = users.filter(user => user.id != id);
     
+    fs.writeFile("MOCK_DATA.json", JSON.stringify(newUsers), (err) => {
+        if (err) throw err;
+
+        return res.send(
+            `User with id ${id} deleted successfully`
+        )
+    })
 })
 
-app.post('')
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
